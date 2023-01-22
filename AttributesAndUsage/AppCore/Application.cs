@@ -6,8 +6,7 @@ using static System.Console;
 namespace AppCore
 {
     public static class Application
-    {
-         
+    {        
         public static void GetDocs()
         {
             Assembly forDocumentAttributes = Assembly.LoadFrom("Documentor");
