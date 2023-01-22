@@ -25,13 +25,13 @@ namespace AppCore.Models
         public BEZAOTrainee() { }
 
         [Document(Description = "This makes the trainee quiet when something strange happens.", Input = "It takes in a someThingStrange as an object.")]
-        internal void Quiet(object someThingStrange)
+        public void Quiet(object someThingStrange)
         {
             //maintaining silence
         }
 
         [Document(Description = "This makes the trainee code when an idea comes.", Input = "It takes in a someThingStrange as an object.", Output = "It returns an object.")]
-        internal object Code(object someIdea)
+        public object Code(object someIdea)
         {
             return someIdea;
         }
@@ -56,7 +56,7 @@ namespace AppCore.Models
         }
 
     }
-
+    [Document(Description ="These are what trainees scream")]
     public enum Scream
     {
         Omo,
