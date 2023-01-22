@@ -5,9 +5,7 @@ using static System.Console;
 
 namespace AppCore
 {
-    public static class Application
-    {        
-        public static void GetDocs()
+    public static void GetDocs()
         {
             Assembly forDocumentAttributes = Assembly.LoadFrom("Documentor");
 
@@ -29,14 +27,17 @@ namespace AppCore
 
             if (documentAttribute != null)
             {
+
+
+                if (type.IsEnum)
+                {
+                    Display($"\nEnum:\t{type.Name}\n\tDescription: \n\t\t{documentAttribute.Description}\n");
+                }
+
                 if (type.IsClass)
                 {
                     Display($"\nClass:\t{type.Name}\n\tDescription: \n\t\t{documentAttribute.Description}\n");
                 }
-                if (type.IsEnum)
-                {
-                    Display($"\nEnum:\t{type.Name}\n\tDescription: \n\t\t{documentAttribute.Description}\n");
-                }               
             }
         }
 
@@ -80,7 +81,7 @@ namespace AppCore
 
                     if (documentAttribute != null && !string.IsNullOrEmpty(documentAttribute.Description))
                     {
-                        Display($"\n\tProperty: {property.Name}\n\tDescription: {documentAttribute.Description}\n");
+                        Display($"\n\tProperty: \n\t\t{property.Name}\n\tDescription: \n\t\t{documentAttribute.Description}\n");
                     }
                 }
             }
@@ -90,20 +91,20 @@ namespace AppCore
         {
             var methods = type.GetMethods();
 
-            foreach( var method in methods)
+            foreach (var method in methods)
             {
                 var documentAttribute = (DocumentAttribute)method.GetCustomAttribute(typeof(DocumentAttribute));
 
                 if (documentAttribute != null && !string.IsNullOrEmpty(documentAttribute.Description))
                 {
-                    Display($"\tMethod: {method.Name}\n\tDescription: {documentAttribute.Description}\n");
+                    Display($"\n\tMethod: \n\t\t{method.Name}\n\tDescription: \n\t\t{documentAttribute.Description}");
 
-                    string checkInput = string.IsNullOrEmpty(documentAttribute.Input) ? "" : $"\n\tInput: \n\t\t{documentAttribute.Input}";
+                    string checkInput = string.IsNullOrEmpty(documentAttribute.Input) ? "" : $"\tInput: \n\t\t{documentAttribute.Input}";
                     Display(checkInput);
 
-                    var checkOutput = string.IsNullOrEmpty(documentAttribute.Output) ? "" : $"\n\tOutput: \n\t\t{documentAttribute.Output}";
+                    var checkOutput = string.IsNullOrEmpty(documentAttribute.Output) ? "" : $"\tOutput: \n\t\t{documentAttribute.Output}";
                     Display(checkOutput);
                 }
             }
-        }    
+        }   
 }
