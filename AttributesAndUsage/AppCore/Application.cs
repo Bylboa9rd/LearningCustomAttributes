@@ -7,215 +7,104 @@ namespace AppCore
 {
     public static class Application
     {
-        static Type traineeType = typeof(BEZAOTrainee);
-
-        public static void Run()
-        {
-            GetDocs();
-        }
+         
         public static void GetDocs()
         {
-            ListClasses();
-            ListConstructors();
-            ListProperties();
-            ListMethods();
-            ListNestedTypes();
-        }
-        public static void ListClasses()
-        {
-            WriteLine("{0} Documentation:", Assembly.LoadFrom("AppCore").FullName);
-            WriteLine("\nClasses: \n\n\t1. {0}:", traineeType.Name);
+            Assembly forDocumentAttributes = Assembly.LoadFrom("Documentor");
 
-            object[] classAttributes = traineeType.GetCustomAttributes(true);
+            Type[] types = forDocumentAttributes.GetTypes();
 
-            foreach (Attribute item in classAttributes)
+            foreach (Type t in types)
             {
-                if (item is DocumentAttribute)
+                ListTypes(t);
+                ListConstructors(t);
+                ListProperties(t);
+                ListMethods(t);
+            }
+
+        }
+
+        public static void ListTypes(Type type)
+        {
+            var documentAttribute = (DocumentAttribute)type.GetCustomAttribute(typeof(DocumentAttribute));
+
+            if (documentAttribute != null)
+            {
+                if (type.IsClass)
                 {
-                    DocumentAttribute documentAttribute = (DocumentAttribute)item;
-                    WriteLine("\t\tDescription:\n\t\t\t{0}", documentAttribute.Description);
+                    Display($"\nClass:\t{type.Name}\n\tDescription: \n\t\t{documentAttribute.Description}\n");
                 }
+                if (type.IsEnum)
+                {
+                    Display($"\nEnum:\t{type.Name}\n\tDescription: \n\t\t{documentAttribute.Description}\n");
+                }               
             }
         }
-        public static void ListConstructors()
-        {
-            WriteLine("\n\tConstructor(s):");
 
-            ConstructorInfo[] constructors = traineeType.GetConstructors();
+
+
+        public static void ListConstructors(Type type)
+        {
+            var constructors = type.GetConstructors();
 
             if (constructors.Any())
             {
-                for (int i = 0; i < constructors.GetLength(0); i++)
+                foreach (var constructor in constructors)
                 {
-                    object[] constructorAttributes = constructors[i].GetCustomAttributes(typeof(DocumentAttribute), true);
+                    var documentAttribute = (DocumentAttribute)constructor.GetCustomAttribute(typeof(DocumentAttribute));
 
-                    foreach (Attribute attr in constructorAttributes)
+                    if (documentAttribute != null)
                     {
-                        if (attr is DocumentAttribute docAttr)
-                        {
-                            docAttr = (DocumentAttribute)attr;
+                        Display($"\tConstructor: \n\tDescription: \n\t\t{documentAttribute.Description}");
 
-                            WriteLine($"\t\t{constructors[i].Name}:\n\t\tDescription:\n\t\t\t{docAttr.Description}\n\t\tInput: {docAttr.Input}");
+                        string checkInput = string.IsNullOrEmpty(documentAttribute.Input) ? "" : $"\tInput: \n\t\t{documentAttribute.Input}";
+                        Display(checkInput);
 
-                        }
-                        return;
+                        var checkOutput = string.IsNullOrEmpty(documentAttribute.Output) ? "" : $"\tOutput: \n\t\t{documentAttribute.Output}";
+                        Display(checkOutput);
+
                     }
                 }
-            }
-            else
-            {
-                WriteLine("Constructors not found!");
-            }
 
+            }
         }
 
-        public static void ListProperties()
+        public static void ListProperties(Type type)
         {
-            WriteLine("\n\tProperties: ");
-
-            PropertyInfo[] properties = traineeType.GetProperties();
+            var properties = type.GetProperties();
 
             if (properties.Any())
             {
-                for (int i = 0; i < properties.GetLength(0); i++)
+                foreach (var property in properties)
                 {
-                    object[] propertyAttributes = properties[i].GetCustomAttributes(true);
+                    var documentAttribute = (DocumentAttribute)property.GetCustomAttribute(typeof(DocumentAttribute));
 
-                    foreach (Attribute item in propertyAttributes)
+                    if (documentAttribute != null && !string.IsNullOrEmpty(documentAttribute.Description))
                     {
-                        if (item is DocumentAttribute documentAttribute)
-                        {
-                            documentAttribute = (DocumentAttribute)item;
-                            WriteLine($"\n\t\t{properties[i].Name}\n\t\tDescription: {documentAttribute.Description}");
-                        }
+                        Display($"\n\tProperty: {property.Name}\n\tDescription: {documentAttribute.Description}\n");
                     }
                 }
             }
-            else
-            {
-                WriteLine("Properties not found!");
-            }
-
         }
 
-        public static void ListMethods()
+        public static void ListMethods(Type type)
         {
-            WriteLine("\n\tMethods:");
+            var methods = type.GetMethods();
 
-            var methodInfoList = traineeType.GetMethods();
-
-            if (methodInfoList.Any())
+            foreach( var method in methods)
             {
-                for (int i = 0; i < methodInfoList.GetLength(0); i++)
+                var documentAttribute = (DocumentAttribute)method.GetCustomAttribute(typeof(DocumentAttribute));
+
+                if (documentAttribute != null && !string.IsNullOrEmpty(documentAttribute.Description))
                 {
-                    object[] methodAttributes = methodInfoList[i].GetCustomAttributes(true);
+                    Display($"\tMethod: {method.Name}\n\tDescription: {documentAttribute.Description}\n");
 
-                    foreach (Attribute attribute in methodAttributes)
-                    {
-                        if (attribute is DocumentAttribute att)
-                        {
-                            WriteLine($"\t{methodInfoList[i].Name}\n\t\tDescription:{att.Description}\n\t\tInput:{att.Input}\n\t\t{att.Output}");
-                        }
+                    string checkInput = string.IsNullOrEmpty(documentAttribute.Input) ? "" : $"\n\tInput: \n\t\t{documentAttribute.Input}";
+                    Display(checkInput);
 
-                    }
+                    var checkOutput = string.IsNullOrEmpty(documentAttribute.Output) ? "" : $"\n\tOutput: \n\t\t{documentAttribute.Output}";
+                    Display(checkOutput);
                 }
             }
-            else
-            {
-                WriteLine("Methods not found!");
-            }        
-        }
-
-        public static void ListNestedTypes()
-        {
-            WriteLine("\nNested classes: ");
-
-            Type[] nestedTypes = traineeType.GetNestedTypes();
-            
-            if (nestedTypes.Any())
-            {
-                for (int i = 0; i < nestedTypes.GetLength(0); i++)
-                {
-                    WriteLine($"\t2. {nestedTypes[i].Name}");
-
-                    object[] attributes = nestedTypes[i].GetCustomAttributes(true);
-
-                    foreach(Attribute attribute in attributes)
-                    {
-                        if (attribute is DocumentAttribute documentAttribute)
-                        {
-                            WriteLine($"\t\tDescription: \n\t\t\t{documentAttribute.Description}");
-                        }
-                    }
-                }
-            }
-            else
-            {
-                WriteLine("No nested types found!");
-            }
-
-        }
-
-        public static void ListEnums()
-        {
-            WriteLine("Enums: ");
-
-            /*string[] enumNames = traineeType.GetEnumNames();
-
-            if (enumNames.Any())
-            {
-                var enumValues = traineeType.GetEnumValues();
-
-                for (int i = 0; i < enumNames.GetLength(0); i++)
-                {
-                    WriteLine(enumNames[i]);
-
-
-                    WriteLine(enumValues);
-
-                }
-            }*/
-
-            var enumValues = traineeType.GetEnumValues();
-
-            for (int i = 0; i < enumValues.GetLength(0); i++)
-            {
-
-
-                WriteLine(enumValues);
-
-            }
-        }
-
-        /*public static string? GetAttribute(Type desiredType, Type desiredAttribute)
-        {
-            var attribute = Attribute.GetCustomAttribute(desiredType, desiredAttribute);
-
-            if (attribute is not null)
-                Display(attribute);
-            else
-                WriteLine($"The class {desiredType} has no attributes.");
-
-            return attribute?.ToString();
-        }
-
-        private static void Display(Attribute attribute)
-        {
-            var propertyInfoList = attribute.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            //WriteLine($"The {attribute} attribute:");
-
-            foreach (var pInfo in propertyInfoList)
-            {
-                if (!string.IsNullOrEmpty(pInfo.Name))
-                {
-                    WriteLine($"Description:\n\t\t{pInfo.GetValue(attribute)}");
-                    return;
-                }
-
-            }
-
-        }*/
-
-    }
+        }    
 }
